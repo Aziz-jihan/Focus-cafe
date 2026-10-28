@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import Overlay from "./Overlay";
 import { ChevronDownIcon, ChevronUpIcon } from "./PixelIcons";
 import SleepingCat from "./SleepingCat";
@@ -10,24 +10,56 @@ interface TimePickerProps {
 }
 
 const PRESETS = [15, 25, 50, 90];
+const MAX_HOURS = 4;
 
+// Indexed by distance from the selected row
 const ROW_STYLES = [
-  "text-xs opacity-45 md:text-sm",
+  "text-2xl md:text-[30px]",
   "text-base opacity-75 md:text-lg",
-  "my-1 h-[60px]! bg-cream text-2xl shadow-[inset_0_0_0_4px_#813D3C] md:my-1.5 md:h-[72px]! md:text-[30px]",
+  "text-xs opacity-45 md:text-sm",
 ];
 
 interface WheelProps {
   label: string;
   unit: string;
   value: number;
-  modulo: number;
+  count: number;
   onChange: (value: number) => void;
 }
 
-// Five-row scroll wheel: the selected value sits in the highlighted middle row
-function Wheel({ label, unit, value, modulo, onChange }: WheelProps) {
-  const wrap = (n: number) => (n + modulo) % modulo;
+// Scroll-snapping wheel showing five rows; the row in the highlighted middle slot is the value
+function Wheel({ label, unit, value, count, onChange }: WheelProps) {
+  const listRef = useRef<HTMLDivElement>(null);
+  const hasScrolled = useRef(false);
+  const wrap = (n: number) => (n + count) % count;
+
+  const rowHeight = () => listRef.current?.querySelector<HTMLElement>("[data-row]")?.offsetHeight ?? 1;
+
+  // Move the wheel when the value changes from outside a scroll (arrows, presets, row taps).
+  // Scrolling itself reports the value it lands on, so it never triggers a jump here.
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const current = Math.round(list.scrollTop / rowHeight());
+    if (current !== value) {
+      const near = hasScrolled.current && Math.abs(current - value) <= 3;
+      list.scrollTo({ top: value * rowHeight(), behavior: near ? "smooth" : "instant" });
+    }
+    hasScrolled.current = true;
+  }, [value]);
+
+  const handleScroll = () => {
+    const list = listRef.current;
+    if (!list) return;
+    const index = Math.min(count - 1, Math.max(0, Math.round(list.scrollTop / rowHeight())));
+    if (index !== value) onChange(index);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+    e.preventDefault();
+    onChange(wrap(value + (e.key === "ArrowUp" ? -1 : 1)));
+  };
 
   return (
     <div className="flex flex-col items-center gap-1.5 md:gap-2">
@@ -40,22 +72,37 @@ function Wheel({ label, unit, value, modulo, onChange }: WheelProps) {
       >
         <ChevronUpIcon />
       </button>
-      <div className="flex w-full flex-col items-stretch">
-        {[-2, -1, 0, 1, 2].map((offset) => {
-          const v = wrap(value + offset);
-          return (
+      <div className="relative w-full">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-1/2 h-[60px] -translate-y-1/2 bg-cream shadow-[inset_0_0_0_4px_#813D3C] md:h-[68px]"
+        />
+        <div
+          ref={listRef}
+          role="group"
+          aria-label={`${label}: ${value}`}
+          onScroll={handleScroll}
+          onKeyDown={handleKeyDown}
+          className="scrollbar-none relative h-[240px] snap-y snap-mandatory overflow-y-auto overscroll-contain md:h-[280px]"
+        >
+          {/* Two empty rows above and below let the first and last values reach the middle */}
+          <div aria-hidden="true" className="h-24 md:h-28" />
+          {Array.from({ length: count }, (_, v) => (
             <button
-              key={offset}
+              key={v}
+              data-row
               type="button"
+              tabIndex={v === value ? 0 : -1}
               onClick={() => onChange(v)}
               aria-label={`${v} ${unit}`}
-              aria-pressed={offset === 0}
-              className={`picker-row ${ROW_STYLES[2 - Math.abs(offset)]}`}
+              aria-pressed={v === value}
+              className={`picker-row snap-center ${ROW_STYLES[Math.min(2, Math.abs(v - value))]}`}
             >
               {String(v).padStart(2, "0")}
             </button>
-          );
-        })}
+          ))}
+          <div aria-hidden="true" className="h-24 md:h-28" />
+        </div>
       </div>
       <button
         type="button"
@@ -70,7 +117,7 @@ function Wheel({ label, unit, value, modulo, onChange }: WheelProps) {
 }
 
 function TimePicker({ totalSeconds, onCancel, onConfirm }: TimePickerProps) {
-  const [hours, setHours] = useState(Math.floor(totalSeconds / 3600));
+  const [hours, setHours] = useState(Math.min(MAX_HOURS, Math.floor(totalSeconds / 3600)));
   const [minutes, setMinutes] = useState(Math.floor((totalSeconds % 3600) / 60));
 
   const handleConfirm = () => {
@@ -116,8 +163,8 @@ function TimePicker({ totalSeconds, onCancel, onConfirm }: TimePickerProps) {
         </div>
 
         <div className="grid grid-cols-2 gap-4 md:gap-6">
-          <Wheel label="Hours" unit="hours" value={hours} modulo={13} onChange={setHours} />
-          <Wheel label="Minutes" unit="minutes" value={minutes} modulo={60} onChange={setMinutes} />
+          <Wheel label="Hours" unit="hours" value={hours} count={MAX_HOURS + 1} onChange={setHours} />
+          <Wheel label="Minutes" unit="minutes" value={minutes} count={60} onChange={setMinutes} />
         </div>
 
         <div className="grid grid-cols-2 gap-4 md:gap-5">
