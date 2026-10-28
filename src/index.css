@@ -1,0 +1,300 @@
+@import "tailwindcss";
+
+@theme {
+  --color-espresso: #322d2a;
+  --color-latte: #e5c59e;
+  --color-cream: #f2dec2;
+  --color-foam: #f6e6cf;
+  --color-sand: #d8b58b;
+  --color-caramel: #af8360;
+  --color-berry: #813d3c;
+  --color-berry-light: #934645;
+
+  --font-pixel: "Press Start 2P", monospace;
+  --font-body: "Pixelify Sans", system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    margin: 0;
+    background: var(--color-espresso);
+    color: var(--color-espresso);
+    font-family: var(--font-body);
+  }
+}
+
+/* 4px stepped outline used by every pixel element */
+@utility pixel-border {
+  box-shadow:
+    0 -4px 0 0 #322d2a,
+    0 4px 0 0 #322d2a,
+    -4px 0 0 0 #322d2a,
+    4px 0 0 0 #322d2a;
+}
+
+@utility pixelated {
+  image-rendering: pixelated;
+}
+
+@layer components {
+  .pixel-panel {
+    background: var(--color-latte);
+    box-shadow:
+      0 -4px 0 0 #322d2a,
+      0 4px 0 0 #322d2a,
+      -4px 0 0 0 #322d2a,
+      4px 0 0 0 #322d2a,
+      inset 0 4px 0 0 rgba(255, 246, 228, 0.55),
+      inset 0 -6px 0 0 #af8360,
+      6px 10px 0 0 rgba(30, 26, 24, 0.5);
+
+    @variant md {
+      box-shadow:
+        0 -4px 0 0 #322d2a,
+        0 4px 0 0 #322d2a,
+        -4px 0 0 0 #322d2a,
+        4px 0 0 0 #322d2a,
+        inset 0 4px 0 0 rgba(255, 246, 228, 0.55),
+        inset 0 -6px 0 0 #af8360,
+        8px 12px 0 0 rgba(30, 26, 24, 0.5);
+    }
+  }
+
+  .pixel-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 0 20px;
+    border: 0;
+    cursor: pointer;
+    font-family: var(--font-pixel);
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    background: var(--color-berry);
+    color: var(--color-foam);
+    box-shadow:
+      0 -4px 0 0 #322d2a,
+      0 4px 0 0 #322d2a,
+      -4px 0 0 0 #322d2a,
+      4px 0 0 0 #322d2a,
+      inset 0 -6px 0 0 #5a2827,
+      inset 0 4px 0 0 #9c5150;
+
+    @variant md {
+      gap: 12px;
+      min-height: 56px;
+      padding: 0 24px;
+      font-size: 16px;
+    }
+
+    &:hover {
+      background: var(--color-berry-light);
+    }
+
+    &:active {
+      transform: translateY(2px);
+      box-shadow:
+        0 -4px 0 0 #322d2a,
+        0 4px 0 0 #322d2a,
+        -4px 0 0 0 #322d2a,
+        4px 0 0 0 #322d2a,
+        inset 0 -2px 0 0 #5a2827;
+    }
+
+    &:focus-visible {
+      outline: 4px solid var(--color-espresso);
+      outline-offset: 5px;
+    }
+  }
+
+  .pixel-btn-ghost {
+    background: var(--color-sand);
+    color: var(--color-espresso);
+    box-shadow:
+      0 -4px 0 0 #322d2a,
+      0 4px 0 0 #322d2a,
+      -4px 0 0 0 #322d2a,
+      4px 0 0 0 #322d2a,
+      inset 0 -6px 0 0 #af8360,
+      inset 0 4px 0 0 #efd9ba;
+
+    &:hover {
+      background: #e0c29c;
+    }
+  }
+
+  .pixel-btn-icon {
+    width: 48px;
+    min-height: 48px;
+    padding: 0;
+
+    @variant md {
+      width: 52px;
+      min-height: 52px;
+    }
+  }
+
+  /* Clickable clock on the home panel */
+  .time-display {
+    border: 0;
+    background: none;
+    cursor: pointer;
+    font-family: var(--font-pixel);
+    line-height: 1;
+    color: var(--color-espresso);
+    padding: 10px 8px;
+    text-shadow: 4px 4px 0 #af8360;
+
+    @variant md {
+      padding: 12px 16px;
+      text-shadow: 5px 5px 0 #af8360;
+    }
+
+    &:hover {
+      color: var(--color-berry);
+    }
+
+    &:focus-visible {
+      outline: 4px solid var(--color-espresso);
+      outline-offset: 5px;
+    }
+  }
+
+  /* Outlined countdown shown while focusing */
+  .time-big {
+    font-family: var(--font-pixel);
+    line-height: 1;
+    color: var(--color-latte);
+    text-shadow:
+      -4px 0 0 #813d3c,
+      4px 0 0 #813d3c,
+      0 -4px 0 #813d3c,
+      0 4px 0 #813d3c,
+      -4px -4px 0 #813d3c,
+      4px -4px 0 #813d3c,
+      -4px 4px 0 #813d3c,
+      4px 4px 0 #813d3c,
+      8px 8px 0 rgba(50, 45, 42, 0.85);
+
+    @variant md {
+      text-shadow:
+        -4px 0 0 #813d3c,
+        4px 0 0 #813d3c,
+        0 -4px 0 #813d3c,
+        0 4px 0 #813d3c,
+        -4px -4px 0 #813d3c,
+        4px -4px 0 #813d3c,
+        -4px 4px 0 #813d3c,
+        4px 4px 0 #813d3c,
+        10px 10px 0 rgba(50, 45, 42, 0.85);
+    }
+  }
+
+  /* One row of the scroll-wheel time picker */
+  .picker-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    font-family: var(--font-pixel);
+    color: var(--color-espresso);
+
+    @variant md {
+      height: 48px;
+    }
+
+    &:hover {
+      color: var(--color-berry);
+    }
+
+    &:focus-visible {
+      outline: 4px solid var(--color-espresso);
+      outline-offset: 5px;
+    }
+  }
+
+  .buy-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 10px;
+    border: 0;
+    cursor: pointer;
+    font-family: var(--font-pixel);
+    font-size: 11px;
+    line-height: 1;
+    background: var(--color-berry);
+    color: var(--color-foam);
+
+    @variant md {
+      width: auto;
+      min-width: 120px;
+      gap: 8px;
+      padding: 0 16px;
+      font-size: 12px;
+    }
+
+    &:hover {
+      background: var(--color-berry-light);
+    }
+
+    &:disabled {
+      background: var(--color-sand);
+      color: #4a3b33;
+      cursor: not-allowed;
+    }
+
+    &:focus-visible {
+      outline: 3px solid var(--color-espresso);
+      outline-offset: 3px;
+    }
+  }
+
+  /* Chunky slider: berry fill up to --level, sand after */
+  .pixel-range {
+    appearance: none;
+    height: 12px;
+    cursor: pointer;
+    background: linear-gradient(to right, #813d3c var(--level), #d8b58b var(--level));
+    box-shadow: 0 0 0 3px #322d2a;
+
+    &::-webkit-slider-thumb {
+      appearance: none;
+      width: 14px;
+      height: 24px;
+      background: var(--color-foam);
+      box-shadow: 0 0 0 3px #322d2a;
+    }
+
+    &::-moz-range-thumb {
+      width: 14px;
+      height: 24px;
+      border: 0;
+      border-radius: 0;
+      background: var(--color-foam);
+      box-shadow: 0 0 0 3px #322d2a;
+    }
+
+    &:focus-visible {
+      outline: 3px solid var(--color-latte);
+      outline-offset: 6px;
+    }
+  }
+
+  .menu-scroll {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #af8360 transparent;
+  }
+}
